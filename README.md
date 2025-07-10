@@ -11,6 +11,7 @@ A Model Context Protocol (MCP) server for logging and retrieving memories from L
 - **Context Window Caching**: Archive, retrieve, and summarize conversation context
 - **Relevance Scoring**: Automatically score archived content relevance to current context
 - **Tag-based Search**: Categorize and search context by tags
+- **Conversation Orchestration**: External system to manage context window caching
 - **MongoDB Storage**: Persistent storage using MongoDB database
 
 ## Installation
@@ -38,6 +39,30 @@ export MONGODB_URI="mongodb://localhost:27017"
 Default: `mongodb://localhost:27017`
 
 ## Usage
+
+### Running the MCP Server
+
+Start the MCP server:
+
+```bash
+npm start
+```
+
+### Running the Conversation Orchestrator Demo
+
+Try the interactive CLI demo:
+
+```bash
+npm run cli
+```
+
+The CLI demo allows you to:
+
+- Add messages to simulate conversation
+- See automatic archiving when context gets full
+- Trigger manual archiving and retrieval
+- Create summaries of archived content
+- Monitor conversation status and get recommendations
 
 ### Basic Memory Tools
 
@@ -136,6 +161,44 @@ Default: `mongodb://localhost:27017`
    LLM: [Uses create-summary tool to condense archived content]
    ```
 
+## Conversation Orchestration System
+
+The `ConversationOrchestrator` class provides automatic context window management:
+
+### Key Features
+
+- **Automatic Archiving**: Archives content when context usage reaches 80%
+- **Intelligent Retrieval**: Retrieves relevant content when usage drops below 30%
+- **Relevance Scoring**: Uses keyword overlap to score archived content relevance
+- **Smart Tagging**: Automatically generates tags based on content keywords
+- **Conversation State Management**: Tracks active conversations and their context
+- **Recommendations**: Provides suggestions for optimal context management
+
+### Usage Example
+
+```typescript
+import { ConversationOrchestrator } from "./orchestrator.js";
+
+const orchestrator = new ConversationOrchestrator(8000); // 8k word limit
+
+// Add a message (triggers automatic archiving/retrieval)
+const result = await orchestrator.addMessage(
+  "conversation-123",
+  "This is a new message in the conversation",
+  "claude",
+);
+
+// Check if archiving is needed
+if (result.archiveDecision?.shouldArchive) {
+  await orchestrator.executeArchive(result.archiveDecision, result.state);
+}
+
+// Check if retrieval is needed
+if (result.retrievalDecision?.shouldRetrieve) {
+  await orchestrator.executeRetrieval(result.retrievalDecision, result.state);
+}
+```
+
 ## Database Schema
 
 ### Basic Memory Structure
@@ -172,12 +235,12 @@ type ExtendedMemory = {
 
 ## Context Window Caching Workflow
 
-The system is designed to work with an external orchestration system that:
+The orchestration system automatically:
 
-1. **Monitors conversation length** with the LLM
-2. **Archives context** when the conversation gets long
+1. **Monitors conversation length** and context usage
+2. **Archives content** when context usage reaches 80%
 3. **Scores relevance** of archived content against current context
-4. **Retrieves relevant content** when needed
+4. **Retrieves relevant content** when usage drops below 30%
 5. **Creates summaries** to condense very long conversations
 
 ### Key Features
@@ -187,6 +250,7 @@ The system is designed to work with an external orchestration system that:
 - **Tag-based Organization**: Categorize content for easy retrieval
 - **Summary Linking**: Preserve links between summaries and original content
 - **Backward Compatibility**: All existing memory functions work unchanged
+- **Automatic Management**: No manual intervention required for basic operations
 
 ## Development
 
@@ -197,13 +261,12 @@ npm run build
 node build/index.js
 ```
 
-## Important Limitations
+To run the CLI demo:
 
-This MCP provides the storage and retrieval tools, but you need an external orchestration system to:
+```bash
+npm run cli
+```
 
-- Monitor conversation length with the LLM
-- Automatically archive context when it gets long
-- Orchestrate the archive/retrieve cycle
-- Handle requests from the LLM to retrieve specific archived information
+## License
 
-The MCP provides the tools, but the conversation management wrapper needs to be built separately.
+ISC

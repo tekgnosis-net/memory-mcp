@@ -98,7 +98,3 @@ To run in development mode:
 npm run build
 node build/index.js
 ```
-
-## License
-
-ISC

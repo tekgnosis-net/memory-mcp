@@ -1,26 +1,9 @@
 import { MongoClient, ObjectId, Db, Collection } from "mongodb";
+import { Memory, ContextType } from "./types.js";
 
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017";
 const DATABASE_NAME = "memory_mcp";
 const COLLECTION_NAME = "memories";
-
-export type ContextType = "active" | "archived" | "summary";
-
-export interface Memory {
-  _id?: ObjectId;
-  memories: string[];
-  timestamp: Date;
-  llm: string;
-  userId?: string;
-  conversationId?: string;
-  contextType?: ContextType;
-  relevanceScore?: number; // 0-1
-  tags?: string[];
-  parentContextId?: ObjectId; // Reference to original content for summaries
-  messageIndex?: number; // Order within conversation
-  wordCount?: number;
-  summaryText?: string;
-}
 
 let client: MongoClient;
 let db: Db;
@@ -32,7 +15,6 @@ export async function connect() {
   await client.connect();
   db = client.db(DATABASE_NAME);
   collection = db.collection(COLLECTION_NAME);
-
   return collection;
 }
 
@@ -221,3 +203,6 @@ export async function searchContextByTags(tags: string[]): Promise<Memory[]> {
     .sort({ relevanceScore: -1, timestamp: -1 })
     .toArray();
 }
+
+// Re-export types for convenience
+export { Memory, ContextType } from "./types.js";

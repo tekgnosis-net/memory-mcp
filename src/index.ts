@@ -1,13 +1,13 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import { ObjectId } from "mongodb";
 import {
   connect,
   saveMemories,
   getAllMemories,
   clearAllMemories,
   closeDatabase,
-  Memory,
   archiveContext,
   retrieveContext,
   scoreRelevance,
@@ -15,7 +15,10 @@ import {
   getConversationSummaries,
   searchContextByTags,
 } from "./db.js";
-import { ObjectId } from "mongodb";
+import {
+  Memory,
+  ContextItem,
+} from "./types.js";
 
 const server = new McpServer({
   name: "memory-mcp",

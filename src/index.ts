@@ -1,5 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import express from "express";
 import { z } from "zod";
 import { ObjectId } from "mongodb";
 import {
@@ -27,6 +29,18 @@ const server = new McpServer({
     resources: {},
     tools: {},
   },
+});
+
+const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
+const app = express();
+app.use(express.json());
+app.post("/mcp", (req, res) => {
+  transport.handleRequest(req, res, req.body);
+});
+
+const port = process.env.PORT || 8099;
+app.listen(port, () => {
+  console.log(`MCP server listening on port ${port}`);
 });
 
 // Tool to save memories (overwrites existing ones)
@@ -542,18 +556,12 @@ server.tool(
   },
 );
 
-async function main() {
-  try {
-    await connect();
-    const transport = new StdioServerTransport();
-    await server.connect(transport);
-    console.error("Memory MCP server started successfully");
-  } catch (error) {
-    console.error("Failed to start Memory MCP server:", error);
-    process.exit(1);
-  }
-}
+// Connect server to transport
+await server.connect(transport);
 
+console.log("Memory MCP server started successfully");
+
+// Graceful shutdown handling
 process.on("SIGINT", async () => {
   console.error("Shutting down Memory MCP server...");
   await closeDatabase();
@@ -564,9 +572,4 @@ process.on("SIGTERM", async () => {
   console.error("Shutting down Memory MCP server...");
   await closeDatabase();
   process.exit(0);
-});
-
-main().catch((error) => {
-  console.error("Unhandled error:", error);
-  process.exit(1);
 });

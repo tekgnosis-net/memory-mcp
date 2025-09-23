@@ -29,6 +29,70 @@ npm install
 npm run build
 ```
 
+## Docker Setup
+
+### Using Docker Compose (Recommended)
+
+1. Pull and run the application with MongoDB:
+
+```bash
+docker-compose up -d
+```
+
+The application will be available at `http://localhost:8099`
+
+### Using Pre-built Image from GitHub Container Registry
+
+If you prefer to use the pre-built image from GitHub Container Registry:
+
+```bash
+docker run -d --name mongodb -p 27017:27017 mongo:latest
+docker run -d -p 8099:8099 --link mongodb:mongodb -e MONGODB_URI=mongodb://mongodb:27017 ghcr.io/tekgnosis-net/memory-mcp:latest
+```
+
+### Building Locally
+
+1. Build the Docker image:
+
+```bash
+docker build -t memory-mcp .
+```
+
+2. Run with external MongoDB:
+
+```bash
+docker run -p 8099:8099 -e MONGODB_URI=mongodb://host.docker.internal:27017 memory-mcp
+```
+
+Or run with Docker MongoDB:
+
+```bash
+docker run -d --name mongodb -p 27017:27017 mongo:latest
+docker run -p 8099:8099 --link mongodb:mongodb -e MONGODB_URI=mongodb://mongodb:27017 memory-mcp
+```
+
+## CI/CD
+
+This project uses GitHub Actions for continuous integration and deployment. The workflow automatically:
+
+- Builds multi-platform Docker images (AMD64 and ARM64) on every push to the `main` branch
+- Pushes images to GitHub Container Registry (`ghcr.io`)
+- Tags images with appropriate version tags and `latest`
+- Enables caching for faster builds
+
+### Image Tags
+
+- `latest`: Latest build from main branch
+- `main`: Current main branch commit
+- `v1.0.0`: Release versions (when tags are created)
+- `main-<sha>`: Specific commit hashes
+
+### Supported Platforms
+
+The Docker images are built for multiple architectures:
+- `linux/amd64` (Intel/AMD 64-bit)
+- `linux/arm64` (ARM 64-bit)
+
 ## Configuration
 
 Set the MongoDB connection string via environment variable:

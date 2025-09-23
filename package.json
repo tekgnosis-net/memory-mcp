@@ -21,10 +21,12 @@
   "description": "MCP server for logging and retrieving memories",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.15.0",
+    "express": "^5.1.0",
     "mongodb": "^6.3.0",
     "zod": "^3.25.75"
   },
   "devDependencies": {
+    "@types/express": "^5.0.3",
     "@types/node": "^24.0.10",
     "typescript": "^5.8.3"
   }

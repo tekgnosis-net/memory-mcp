@@ -9,6 +9,7 @@ COPY package*.json ./
 
 # Install all dependencies (including dev dependencies for building)
 RUN npm ci
+RUN npm install -g npm@11.6.0
 
 # Copy source code
 COPY . .
@@ -18,6 +19,7 @@ RUN npm run build
 
 # Production stage
 FROM node:20-alpine AS production
+RUN npm install -g npm@11.6.0
 
 # Set working directory
 WORKDIR /app

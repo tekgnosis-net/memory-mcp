@@ -18,6 +18,10 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=11.0.0"
+  },
   "description": "MCP server for logging and retrieving memories",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.15.0",
